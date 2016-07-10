@@ -3,13 +3,7 @@
         context = canvas.getContext('2d');
 
     window.addEventListener('resize', ResizeCanvas, false);
-
-    function ResizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    ResizeCanvas();
-
+    
     var tileHeight = 30,
         tileWidth = 60,
         mapOffsetX = 0,
@@ -17,9 +11,22 @@
         mapSeed = 50,
         mapTileArray = [],
         mapUpdateRequired = true,
-        mapPosOffsetX = 19,
+        mapPosOffsetX = 0,
         mapPosOffsetY = 0,
-        mapRedraw = false;
+        mapRedraw = false,
+        canvasTranslateOffsetX = 0,
+        canvasTranslateOffsetY = 0;
+
+    function ResizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvasTranslateOffsetX = canvas.width / 2;
+        canvasTranslateOffsetY = canvas.height / 4;
+        context.translate(canvasTranslateOffsetX, canvasTranslateOffsetY)
+    }
+    ResizeCanvas();
+
+    
 
     function DrawIsoTile(x, y, style) {
         context.save();
@@ -107,7 +114,9 @@
         //mouseTileY = (-(e.pageX/tileWidth) + (e.pageY/tileHeight));
         //mouseTileX = ((e.pageX/tileWidth) + (e.pageY/tileHeight));
 
-        var mouseTile = IsometricProjectPoint(e.pageX, e.pageY)
+        var mouseTile = IsometricProjectPoint(e.pageX - canvasTranslateOffsetX, e.pageY - canvasTranslateOffsetY)
+
+        console.log(canvasTranslateOffsetX, canvasTranslateOffsetY, mouseTile);
 
         mouseTileX = mouseTile.x;
         mouseTileY = mouseTile.y;
@@ -200,6 +209,11 @@
 
     var lastCalledTime = new Date().getTime();
 
+
+    // Generate large array of tiles, only draw specific part of that array
+    // generateTileArray(500, 500, mapSeed, mapOffsetX, mapOffsetY);
+
+
     function Draw() {
 
         if (mapUpdateRequired) {
@@ -211,7 +225,7 @@
         if (mapRedraw) {
             var hoveredTileFound = false;
             mapRedraw = false;
-            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.clearRect(-canvasTranslateOffsetX, -canvasTranslateOffsetY, canvas.width, canvas.height);
             for (var x = 0; x < 20; x++) {
                 for (var y = 0; y < 20; y++) {
                     var rnd = Math.random();
